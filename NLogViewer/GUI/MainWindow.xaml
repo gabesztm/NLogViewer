@@ -1,0 +1,99 @@
+﻿<Window x:Class="NLogViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NLogViewer"
+        mc:Ignorable="d"
+        Title="NLog Viewer" Height="450" Width="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <local:LogLevelToColorConverter x:Key="LogLevelToColorConverter"/>
+            <local:DateTimeToVisibilityConverter x:Key="DateTimeToVisibilityConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="F1" Command="{Binding BackwardMinuteCommand}"/>
+        <KeyBinding Key="F2" Command="{Binding BackwardCommand}"/>
+        <KeyBinding Key="F3" Command="{Binding ForwardCommand}"/>
+        <KeyBinding Key="F4" Command="{Binding ForwardMinuteCommand}"/>
+    </Window.InputBindings>
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="10"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Row="1" Grid.Column="1" Content="Load" Width="50" Margin="15" Command="{Binding LoadCommand}"/>
+            <Grid Grid.Row="1" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding SelectedDate}" Visibility="{Binding SelectedDate, Converter={StaticResource DateTimeToVisibilityConverter}}" Grid.Column="0" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Command="{Binding BackwardMinuteCommand}" Content="⇐ 1 min" Width="50" Height="30" Margin="5" VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Command="{Binding BackwardCommand}" Content="← 1 sec" Width="50" Height="30" Margin="5" VerticalAlignment="Center"/>
+                <Button Grid.Column="3" Command="{Binding ForwardCommand}" Content="1 sec →" Width="50" Height="30" Margin="5" VerticalAlignment="Center"/>
+                <Button Grid.Column="4" Command="{Binding ForwardMinuteCommand}" Content="1 min ⇒" Width="50" Height="30" Margin="5" VerticalAlignment="Center"/>
+                <Slider Grid.Column="5" Margin="15" Minimum="0" Maximum="{Binding SLIDER_RESOLUTION}" Value="{Binding SliderSelection, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+            </Grid>
+
+            <Grid Grid.Row="2" Grid.Column="1" Margin="5,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <CheckBox Grid.Row="0" Content="Select all" IsChecked="{Binding IsAllSelected}"/>
+                <ListView Grid.Row="1" ItemsSource="{Binding FilterableComponentsLog}" Width="200">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsLogVisible, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" VerticalAlignment="Center"/>
+                                <Label Content="{Binding Title}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+            <ListView Grid.Row="2" Grid.Column="2" ItemsSource="{Binding VisibleComponentsLog}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="50"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding TimeStamp}" Margin="5,0"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Level}" Foreground="{Binding Level, Converter={StaticResource LogLevelToColorConverter}}" Margin="5,0"/>
+                            <TextBlock Grid.Column="2" Text="{Binding Message}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+        </Grid>
+
+        <TextBlock Background="AliceBlue" Text="Loading..." Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" Cursor="No" FontSize="24"/>
+    </Grid>
+    
+</Window>
